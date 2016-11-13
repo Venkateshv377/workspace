@@ -43,57 +43,67 @@ void init(int size)
 int* my_malloc(int size)
 {
 	int value = 0, i = 0;
+	struct mem_op **temp = &oper1;
 	struct mem_op *temp_node = oper1;
 	struct mem_op *node = (struct mem_op *)malloc(sizeof(struct mem_op));
 
 	if (node == NULL)
-		printf("Erron in allocating data structure for storing process details\n");
+		printf("Erron in allocating data structure\n");
 
 	node->size = size;
 	if (head->flag == 1)
 	{
 		node->address = temp_address;
 		head->flag = 0;
-		printf("head->flag: %d\n", head->flag);
+		node->link = NULL;
+		node->flag = 1;
 	}
 	else
 	{
 		while (i < head->count)
 		{
-			//	printf("temp_node: %d\n", temp_node->size);
+			printf("temp_node->flag: %d\n", temp_node->flag);
 			if (temp_node->flag == 1)
 			{
-				printf("flag: %d\n", temp_node->flag);
 				value += temp_node->size;
 			}
-			printf("Value: %d\n", value);
+			else
+			{
+				if (size <= temp_node->size)
+				{
+					node->address = temp_node->address;
+					goto L1;
+				}
+			}
 			if (temp_node->link != NULL)
 			{
 				temp_node = temp_node->link;
-				//				printf("%d\n", temp_node->flag);
 			}
+			printf("size: %d\n", value);
 			i++;
 		}
 		if (value + size <= head->size)
 		{
 			node->address = oper2->address + oper2->size;
-			//		printf("Value: %d\n", value + size);
-			//		printf("size: %d\n", size);
-			//		printf("Address: %p\n", node->address);		
 		}
 		else
 		{
-			//		printf("Value: %d\n", value + size);
 			printf("Segmentation fault\n");		
+			return;
 		}
+L1:
+		node->link = NULL;
+		node->flag = 1;
 	}
-	node->link = NULL;
-	node->flag = 1;
 
 	if (oper1 == NULL)
+	{
 		oper1 = oper2 = node;
+		printf("Operation1 if condition\n");
+	}
 	else
 	{
+		printf("Operation else condtion\n");
 		oper2->link = node;
 		oper2 = node;
 	}
@@ -105,21 +115,22 @@ void my_free(int *free)
 {
 	struct mem_op *temp_free = oper1;
 
-	while((temp_free)->address != free)
+	while(temp_free->address != free)
 	{
 		temp_free = (temp_free)->link;
 	}
-	(temp_free)->flag = 0;
+	temp_free->flag = 0;
 }
 
 void my_func()
 {
 	struct mem_op **temp = &oper1;
-	int i;
-	for(i = 0; i < 5; i++)
+	while((*temp)->link != NULL)
 	{
+		printf("Size: %d\n", (*temp)->size);
 		printf("flag: %d\n", (*temp)->flag);
-		printf("flag: %x\n", (*temp)->address);
+		printf("Address: %x\n", (*temp)->address);
+		printf("Link: %p\n", (*temp)->link);
 		(*temp) = (*temp)->link;
 	}
 }
@@ -135,14 +146,13 @@ int main()
 	printf("ptr3:%p\n", ptr3);
 	int *ptr4 = my_malloc(20);
 	printf("ptr4:%p\n", ptr4);
-	int *ptr5 = my_malloc(974);
+	int *ptr5 = my_malloc(25);
 	printf("ptr5:%p\n", ptr5);
+	int *ptr6 = my_malloc(30);
+	printf("ptr6:%p\n", ptr6);
 	printf("head->count: %d\n", head->count);
-
-	my_free(ptr4);
-	my_free(ptr2);
-	//	ptr4 = my_malloc(20);
-	printf("ptr4:%p\n", ptr4);
-
-	my_func();
+	my_free(ptr3);
+	int *ptr7 = my_malloc(15);
+	printf("ptr7:%p\n", ptr7);
+	//	my_func();
 }
